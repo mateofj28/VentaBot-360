@@ -1,36 +1,57 @@
 # VentaBot 360 - Estado del Proyecto
 
-## ✅ Lo que ya tenemos y funciona
+## ✅ Completado
 
-1. **Integración con WhatsApp** → Webhook recibiendo mensajes, respuestas automáticas vía Twilio, manejo de múltiples usuarios (cada uno identificado por teléfono)
-2. **Motor de IA básico** → Groq con Llama 3.3, historial de conversación (últimos 10 mensajes), detección de intención básica
-3. **Historial de chats** → Mensajes guardados en PostgreSQL con teléfono, rol, mensaje y timestamp
-4. **Despliegue** → Railway con PostgreSQL, auto-creación de tablas
+### 1. Integración con WhatsApp
+- Webhook recibiendo mensajes via Twilio
+- Respuestas automáticas enviadas al cliente
+- Manejo de múltiples usuarios simultáneos (identificados por teléfono)
+
+### 2. Motor de IA
+- Groq con Llama 3.3 70B
+- Historial de conversación (últimos 10 mensajes)
+- Prompt restringido a responder SOLO con datos del negocio
+
+### 3. Base de conocimiento
+- Tabla de productos (nombre, descripción, precio, stock, categoría, estado)
+- Tabla de info del negocio (clave-valor: horario, ubicación, políticas, etc.)
+- La IA usa estos datos como contexto y NO inventa información
+
+### 4. No inventar información
+- El prompt tiene reglas estrictas para responder solo con datos cargados
+- Si no tiene un producto, lo dice claramente
+- Verificado en pruebas reales
+
+### 5. Flujo de compra
+- Tabla de pedidos (cliente, dirección, teléfono, producto, total, método de pago, estado)
+- Detección automática de pedido confirmado via IA
+- Descuento automático de stock al crear pedido
+- Mensaje de confirmación con número de pedido al cliente
+
+### 6. Panel admin (frontend)
+- React 19 + Vite + TailwindCSS
+- Gestión de productos (CRUD completo)
+- Gestión de info del negocio
+- Vista de pedidos con cambio de estado
+
+### 7. Historial de chats
+- Mensajes guardados en PostgreSQL
+- Identificación por teléfono del cliente
+
+### 8. Despliegue
+- Backend en Railway con PostgreSQL
+- Auto-creación de tablas al iniciar
 
 ---
 
-## ❌ Lo que falta (ordenado por prioridad)
-
-### Crítico (sin esto no sirve como producto)
-
-1. **Base de conocimiento** → No existe. El bot responde con conocimiento general de la IA, no con info del negocio. Necesitamos tablas de productos, info del negocio, y que el prompt de la IA use esos datos. Esto es el corazón de todo.
-
-2. **No inventar información** → Ahora mismo el bot inventa todo. Sin base de conocimiento, la IA alucina productos y precios. El prompt debe restringirse a responder SOLO con datos cargados.
-
-3. **Flujo de compra** → No hay captura de datos del cliente (nombre, dirección), no hay generación de pedidos, no hay tabla de pedidos.
-
-4. **Panel admin** → No existe. El negocio no tiene forma de cargar productos ni info. Necesita un frontend o al menos endpoints CRUD.
+## ⚠️ Pendiente
 
 ### Importante
-
-5. **Estado de conversación** → No hay tracking de en qué etapa está el cliente (nuevo, interesado, comprando). Todo se trata igual.
-
-6. **Respuestas enfocadas al negocio** → Depende de tener la base de conocimiento primero.
-
-7. **Datos del cliente** → Solo guardamos teléfono. Falta tabla de clientes con nombre, dirección, etc.
+- **Estado de conversación** → No hay tracking formal de en qué etapa está el cliente (nuevo, interesado, comprando). La IA lo maneja conversacionalmente pero no hay una tabla de estados.
+- **Datos del cliente** → Solo se guardan en la tabla de pedidos. No hay tabla de clientes independiente para CRM.
+- **Autenticación del panel admin** → Los endpoints y el frontend no tienen login. Cualquiera con la URL puede acceder.
 
 ### Opcional pero valioso
-
-8. **Notificaciones al negocio** → No implementado
-9. **Escalamiento a humano** → No implementado
-10. **Actualización en tiempo real** → Viene gratis cuando tengamos la base de conocimiento
+- **Notificaciones al negocio** → No implementado. No se avisa al dueño cuando hay un pedido nuevo.
+- **Escalamiento a humano** → No implementado. Si el bot no sabe, no puede pasar a una persona.
+- **Despliegue del frontend** → El panel admin solo corre local. Falta desplegarlo (Vercel, Netlify, etc.)
