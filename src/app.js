@@ -1,10 +1,15 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import whatsappRoutes from "./routes/whatsapp.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import { initDB } from "./config/db.js";
 
 const app = express();
+app.use(cors({
+    origin: "https://ventabot-360-admin-production.up.railway.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
