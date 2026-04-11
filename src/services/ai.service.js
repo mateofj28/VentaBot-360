@@ -3,31 +3,39 @@ import axios from "axios";
 
 export const getAIResponse = async (message, history) => {
   try {
-    const prompt = `
+      const apiKey = process.env.GROQ_API_KEY;
+      console.log("🔑 GROQ_API_KEY configurada:", apiKey ? `${apiKey.substring(0, 10)}...` : "❌ NO DEFINIDA");
+
+      const prompt = `
 Eres un vendedor profesional.
 
 Historial:
-${history.map(h => `${h.role}: ${h.message}`).join("\n")}
+${history.map((h) => `${h.role}: ${h.message}`).join("\n")}
 
 Cliente: ${message}
 `;
 
-    const response = await axios.post(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        model: "llama3-70b-8192",
-        messages: [{ role: "user", content: prompt }],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-      }
-    );
+      console.log("🤖 Enviando petición a Groq...");
 
-    return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error("AI error:", error.message);
-    return "Lo siento, hubo un error 🤖";
-  }
+      const response = await axios.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          model: "llama3-70b-8192",
+          messages: [{ role: "user", content: prompt }],
+        },
+        {
+          headers: {
+              Authorization: `Bearer ${apiKey}`,
+            },
+          }
+        );
+
+      console.log("✅ Respuesta de Groq recibida");
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error("❌ AI error:", error.message);
+      console.error("❌ Status:", error.response?.status);
+      console.error("❌ Data:", JSON.stringify(error.response?.data));
+      return "Lo siento, hubo un error 🤖";
+    }
 };
