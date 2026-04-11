@@ -56,4 +56,20 @@ router.delete("/info/:key", async (req, res) => {
     res.json({ deleted: true });
 });
 
+// --- PEDIDOS ---
+
+router.get("/orders", async (_req, res) => {
+    const { rows } = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+    res.json(rows);
+});
+
+router.put("/orders/:id/status", async (req, res) => {
+    const { status } = req.body;
+    const { rows } = await pool.query(
+        "UPDATE orders SET status=$1 WHERE id=$2 RETURNING *",
+        [status, req.params.id]
+    );
+    res.json(rows[0]);
+});
+
 export default router;

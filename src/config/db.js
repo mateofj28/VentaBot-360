@@ -38,7 +38,24 @@ export async function initDB() {
     )
   `);
 
-  console.log("✅ Tablas listas (messages, products, business_info)");
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id SERIAL PRIMARY KEY,
+      phone VARCHAR(20) NOT NULL,
+      customer_name VARCHAR(200),
+      customer_address TEXT,
+      customer_phone VARCHAR(20),
+      product_id INTEGER REFERENCES products(id),
+      product_name VARCHAR(200),
+      quantity INTEGER DEFAULT 1,
+      total DECIMAL(12,2),
+      payment_method VARCHAR(50),
+      status VARCHAR(20) DEFAULT 'pendiente',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  console.log("✅ Tablas listas (messages, products, business_info, orders)");
 }
 
 export default pool;
