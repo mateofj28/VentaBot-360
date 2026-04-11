@@ -1,25 +1,39 @@
 // services/ai.service.js
 import axios from "axios";
+import { buildKnowledgeContext } from "./knowledge.service.js";
 
 export const getAIResponse = async (message, history) => {
   try {
     const apiKey = process.env.GROQ_API_KEY;
+      const knowledge = await buildKnowledgeContext();
 
-      const prompt = `
-Eres un vendedor profesional. Responde de forma breve y concisa, máximo 3 oraciones.
+      const systemPrompt = `Eres un asistente de ventas por WhatsApp. Tu trabajo es atender clientes y ayudarlos a comprar.
 
-Historial:
-${history.map((h) => `${h.role}: ${h.message}`).join("\n")}
+REGLAS ESTRICTAS:
+- SOLO puedes responder con la información que se te proporciona abajo.
+- Si te preguntan por un producto que NO está en el catálogo, di que no lo tienes disponible.
+- NUNCA inventes productos, precios ni información.
+- Si no sabes algo, di "No tengo esa información, pero puedo ayudarte con lo que tenemos disponible."
+- Responde de forma breve, amigable y concisa (máximo 3 oraciones).
+- Si el cliente muestra interés en comprar, pídele sus datos: nombre, dirección y teléfono.
 
-Cliente: ${message}
-`;
+${knowledge}`;
+
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...history.map((h) => ({
+          role: h.role === "user" ? "user" : "assistant",
+          content: h.message,
+        })),
+        { role: "user", content: message },
+      ];
 
       const response = await axios.post(
         "https://api.groq.com/openai/v1/chat/completions",
         {
           model: "llama-3.3-70b-versatile",
-          messages: [{ role: "user", content: prompt }],
-              max_tokens: 300,
+            messages,
+            max_tokens: 300,
           },
           {
             headers: {
@@ -30,7 +44,6 @@ Cliente: ${message}
 
       let reply = response.data.choices[0].message.content;
 
-      // Twilio limita a 1600 caracteres
       if (reply.length > 1500) {
         reply = reply.substring(0, 1497) + "...";
       }

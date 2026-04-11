@@ -1,48 +1,30 @@
 // controllers/whatsapp.controller.js
-
 import { getAIResponse } from "../services/ai.service.js";
 import { sendWhatsAppMessage } from "../services/whatsapp.service.js";
 import { saveMessage, getConversation } from "../services/db.service.js";
-import { detectIntent } from "../utils/intentDetector.js";
 
 export const handleIncomingMessage = async (req, res) => {
     try {
-        const from = req.body.From.replace("whatsapp:", "");
+        const from = req.body.From?.replace("whatsapp:", "");
         const message = req.body.Body;
 
-        console.log("📩 Mensaje recibido:", message);
-
-        // 1. Guardar mensaje
-        await saveMessage(from, "user", message);
-
-        // 2. Obtener historial
-        const history = await getConversation(from);
-
-        // 3. Detectar intención
-        const intent = detectIntent(message);
-
-        let reply;
-
-        // 4. Lógica de negocio
-        if (intent === "SALUDO") {
-            reply = "Hola 👋 ¿En qué puedo ayudarte?";
-        } else if (intent === "PRECIO") {
-            reply = "Claro, tenemos productos desde $20.000 💸";
-        } else {
-            // 5. IA
-            reply = await getAIResponse(message, history);
+        if (!from || !message) {
+            res.set("Content-Type", "text/xml");
+            return res.send("<Response></Response>");
         }
 
-        // 6. Guardar respuesta
-        await saveMessage(from, "bot", reply);
+        console.log(`📩 Mensaje de ${from}: ${message}`);
 
-        // 7. Responder a WhatsApp
+        await saveMessage(from, "user", message);
+        const history = await getConversation(from);
+        const reply = await getAIResponse(message, history);
+        await saveMessage(from, "bot", reply);
         await sendWhatsAppMessage(from, reply);
 
         res.set("Content-Type", "text/xml");
         res.send("<Response></Response>");
     } catch (error) {
-        console.error(error);
+        console.error("❌ Error en webhook:", error);
         res.set("Content-Type", "text/xml");
         res.send("<Response></Response>");
     }

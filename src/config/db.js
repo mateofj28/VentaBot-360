@@ -16,7 +16,29 @@ export async function initDB() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
-  console.log("✅ Tabla messages lista");
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(200) NOT NULL,
+      description TEXT,
+      price DECIMAL(12,2) NOT NULL,
+      stock INTEGER DEFAULT 0,
+      category VARCHAR(100),
+      active BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS business_info (
+      id SERIAL PRIMARY KEY,
+      key VARCHAR(100) UNIQUE NOT NULL,
+      value TEXT NOT NULL
+    )
+  `);
+
+  console.log("✅ Tablas listas (messages, products, business_info)");
 }
 
 export default pool;

@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import whatsappRoutes from "./routes/whatsapp.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 import { initDB } from "./config/db.js";
 
 const app = express();
@@ -12,6 +13,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/webhook", whatsappRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.listen(process.env.PORT || 3000, async () => {
     await initDB();
