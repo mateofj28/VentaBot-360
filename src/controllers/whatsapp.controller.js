@@ -39,9 +39,11 @@ export const handleIncomingMessage = async (req, res) => {
         // 7. Responder a WhatsApp
         await sendWhatsAppMessage(from, reply);
 
-        res.sendStatus(200);
+        res.set("Content-Type", "text/xml");
+        res.send("<Response></Response>");
     } catch (error) {
         console.error(error);
-        res.sendStatus(500);
+        res.set("Content-Type", "text/xml");
+        res.send("<Response></Response>");
     }
 };
